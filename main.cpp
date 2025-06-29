@@ -27,9 +27,9 @@ int main()
         } 
     }
 
-    catch (const std::string& e)
+    catch (const std::exception& e)
     {
-        std::cerr << "Error: " << e << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 

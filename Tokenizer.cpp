@@ -19,7 +19,7 @@ Tokenizer::Tokenizer(const std::string& filePath)
 {
     std::ifstream file(filePath.c_str());
     if (!file)
-        throw std::string("Failed to open the file");
+        throw std::runtime_error("Failed to open the file");
 
     std::ostringstream stream; //strin version of std::cout
     std::string line;

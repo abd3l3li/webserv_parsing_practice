@@ -1,0 +1,41 @@
+
+Q&A:
+
+ - how we re using get function without creating an instance of its obj
+ - explain me this syntax get().x
+ - how it this struct linked to tokens struct
+
+ - how nginx handling the order of the keyword --> does must be sorted or any order can be accepted and we must handle it
+ - what is diff between peek and get
+
+ - explain me more about of the location /upload for ex, why need this then again in the block we get anoter one
+
+ - how the three classes connected to each other and how is the relation worked
+
+ ---------------------------------------------------------------------------------------------------
+
+📘 Functions in Parser.cpp :
+
+🧠 Summary Table :
+
+ | Function / Loop           | What it does                                                 |
+| ------------------------- | ------------------------------------------------------------ |
+| Parser::Parser(...)       | Saves the list of tokens and resets the cursor (\_index)     |
+| peek()                    | Look at the current token (no advance)                       |
+| get()                     | Get the current token and move to the next                   |
+| while (not END\_OF\_FILE) | Loop through all server blocks                               |
+| while (inside server)     | Parse server directives and location blocks                  |
+| while (inside location)   | Parse location settings like root, index, autoindex, methods |
+
+notes:
+
+the third while for what ??
+handle duplication --> maybe using a vector
+split the parser code
+
+-------------------- my understanding of parser funcs --------------------------
+
+- the first loop works for checking for more than one server creatin new conf each time .
+- the second loop works for checking single element each time in a server and creating new ServerConfig each time .
+- the third loop works for doing the same as the server one but for the location block .
+- the fourth one works for the methods that will be stored in one of ServerConfig vector .

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "Tokenizer.hpp"
+#include "Parser.hpp"
 
 std::string type_to_text(TokenType type)
 {
@@ -19,12 +19,14 @@ int main()
     {
         Tokenizer tokenizer("config.conf");
         std::vector<Token> tokens = tokenizer.tokenize();
+        Parser parser(tokens);
+        Config config = parser.parse();
 
-        for (size_t i = 0; i < tokens.size(); ++i)
-        {
-            std::cout << "Type: " << type_to_text(tokens[i].type)
-                    << " | Text: \"" << tokens[i].text << "\"" << std::endl;
-        } 
+        std::cout << config.servers[0].listen_host << ":" 
+                << config.servers[0].listen_port << std::endl;
+        std::cout << "Server Name: " << config.servers[0].server_name << std::endl;
+        std::cout << "Max Body Size: " << config.servers[0].max_body_size << " bytes" << std::endl;
+
     }
 
     catch (const std::exception& e)

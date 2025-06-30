@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cctype>
 
+#include "Config.hpp"
 // TokenType: describes what kind of token we are dealing with
 enum TokenType
 {

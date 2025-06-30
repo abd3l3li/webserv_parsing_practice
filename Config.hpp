@@ -31,7 +31,7 @@ struct ServerConfig
     std::vector<LocationConfig> locations;  // List of locations
 
     ServerConfig() : listen_host("0.0.0.0"), listen_port(80),
-        max_body_size(1024 * 1024) {}
+        max_body_size(1024 * 1024) {} //* more info
 };
 
 // Holds the full parsed config file

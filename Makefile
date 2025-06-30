@@ -4,7 +4,8 @@ CXX = c++
 CXXFLAGS = -std=c++98 -Wall -Wextra -Werror
 RM = rm -rf
 
-SRC = main.cpp Tokenizer.cpp
+SRC = main.cpp Tokenizer.cpp Parser.cpp \
+
 OBJ = $(SRC:.cpp=.o)
 
 BOLD      = \e[1m

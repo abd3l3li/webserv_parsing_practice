@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARSER_HPP
+#define PARSER_HPP
 
 #include <vector>
 #include <string>
@@ -18,7 +19,7 @@ private:
     Token get();
     Token peek();
 
-        // Helper functions
+    // Helper functions
     void parseServer(Config& config);
     void parseListen(ServerConfig& server);
     void parseServerName(ServerConfig& server);
@@ -28,3 +29,5 @@ private:
     void parseLocationAutoindex(LocationConfig& loc);
     void parseLocationMethods(LocationConfig& loc);
 };
+
+#endif // PARSER_HPP

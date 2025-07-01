@@ -70,19 +70,22 @@ void Parser::parseListen(ServerConfig& server) {
     Token val = get();
     if (val.type != VALUE)
         throw std::runtime_error("Expected value for listen directive");
+
     size_t colon = val.text.find(':');
     if (colon == std::string::npos)
         throw std::runtime_error("Invalid listen format. Use IP:PORT");
-    
-    server.listen_host = val.text.substr(0, colon);
 
-    std::string port_str = val.text.substr(colon + 1);
-    int port = std::atoi(port_str.c_str());
-    
-    if (port < 1 || port > 65535)  // 65535 is max port number (2^16 - 1)
+    HostPort hp;
+    hp.listen_host = val.text.substr(0, colon);
+    hp.listen_port = std::atoi(val.text.substr(colon + 1).c_str());
+
+    if (hp.listen_port < 1 || hp.listen_port > 65535)  // 65535 is max port number (2^16 - 1)
         throw std::runtime_error("Port must be between 1 and 65535");
-    
-    server.listen_port = port;
+
+    if (hp.listen_host.empty() || hp.listen_port == 0)
+        throw std::runtime_error("Listen host and port cannot be empty");
+
+    server.listens.push_back(hp);
     
     if (get().type != SEMICOLON)
         throw std::runtime_error("Expected ';' after listen");
@@ -92,7 +95,11 @@ void Parser::parseServerName(ServerConfig& server) {
     Token val = get();
     if (val.type != VALUE)
         throw std::runtime_error("Expected value for server_name directive");
-    server.server_name = val.text;
+
+    if (val.text.empty())
+        throw std::runtime_error("Server name cannot be empty");
+
+    server.server_name.push_back(val.text);
     
     if (get().type != SEMICOLON)
         throw std::runtime_error("Expected ';' after server_name");
@@ -104,6 +111,7 @@ void Parser::parseLocation(ServerConfig& server) {
     Token path = get();
     if (path.type != VALUE)
         throw std::runtime_error("Expected value for location path");
+
     loc.path = path.text;
     
     if (get().type != BRACE_OPEN)
@@ -127,7 +135,7 @@ void Parser::parseLocation(ServerConfig& server) {
     
     if (get().type != BRACE_CLOSE)
         throw std::runtime_error("Expected '}' at end of location block");
-    
+
     server.locations.push_back(loc);
 }
 
@@ -135,6 +143,11 @@ void Parser::parseLocationRoot(LocationConfig& loc) {
     Token val = get();
     if (val.type != VALUE)
         throw std::runtime_error("Expected value for root directive");
+    if (val.text.empty())
+        throw std::runtime_error("Root path cannot be empty");
+    if (val.text[0] != '/')
+        throw std::runtime_error("Root path must start with '/'");
+    
     loc.root = val.text;
     if (get().type != SEMICOLON)
         throw std::runtime_error("Expected ';' after root");
@@ -144,7 +157,15 @@ void Parser::parseLocationIndex(LocationConfig& loc) {
     Token val = get();
     if (val.type != VALUE)
         throw std::runtime_error("Expected value for index directive");
+    if (val.text.empty())
+        throw std::runtime_error("Index cannot be empty");
+    if (val.text.find('/') != std::string::npos)
+        throw std::runtime_error("Index cannot contain '/' character");
+    if (val.text.find('.') == std::string::npos)
+        throw std::runtime_error("Index must have an extension (e.g. index.html)");
+    
     loc.index = val.text;
+
     if (get().type != SEMICOLON)
         throw std::runtime_error("Expected ';' after index");
 }
@@ -176,6 +197,7 @@ void Parser::parseLocationMethods(LocationConfig& loc) {
     }
     if (loc.methods.empty())
         throw std::runtime_error("At least one method must be specified");
+
     if (get().type != SEMICOLON)
         throw std::runtime_error("Expected ';' after methods");
 }

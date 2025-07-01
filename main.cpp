@@ -2,6 +2,7 @@
 #include <vector>
 #include "Parser.hpp"
 
+// Utility function to print token type as string
 std::string type_to_text(TokenType type)
 {
     if (type == KEYWORD)      return "KEYWORD";
@@ -22,11 +23,27 @@ int main()
         Parser parser(tokens);
         Config config = parser.parse();
 
-        std::cout << config.servers[0].listen_host << ":" 
-                << config.servers[0].listen_port << std::endl;
-        std::cout << "Server Name: " << config.servers[0].server_name << std::endl;
-        std::cout << "Max Body Size: " << config.servers[0].max_body_size << " bytes" << std::endl;
- 
+        // Access the first server block safely
+        if (!config.servers.empty())
+        {
+            const ServerConfig& server = config.servers[0];
+
+            if (!server.listens.empty())
+                std::cout << "Listen: " 
+                        << server.listens[1].listen_host << ":" 
+                        << server.listens[1].listen_port << std::endl;
+
+            if (server.server_name.size() >= 1)
+                std::cout << "Server Name: " 
+                        << server.server_name[0] << std::endl;
+
+            std::cout << "Max Body Size: " 
+                    << server.max_body_size << " bytes" << std::endl;
+        }
+        else
+        {
+            std::cout << "No server blocks found in config." << std::endl;
+        }
     }
 
     catch (const std::exception& e)

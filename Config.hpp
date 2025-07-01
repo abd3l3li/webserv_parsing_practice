@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
 
 #include <iostream>
 #include <string>
@@ -21,17 +22,21 @@ struct LocationConfig
 };
 
 // Represents one server block
+struct HostPort
+{
+    std::string listen_host; // e.g. "0.0.0.0"
+    int listen_port;          // e.g. 80
+};
+
 struct ServerConfig
 {
-    std::string listen_host;          // IP address, default: 0.0.0.0
-    int listen_port;                  // Port, default: 80
-    std::string server_name;          // e.g. "localhost"
-    size_t max_body_size;             // limit request body (e.g. 1MB)
+    std::vector<HostPort> listens; // e.g. "
+    std::vector<std::string> server_name;          // e.g. "localhost"
     std::map<int, std::string> error_pages; // 404 => "/404.html"
     std::vector<LocationConfig> locations;  // List of locations
+    size_t max_body_size;
 
-    ServerConfig() : listen_host("0.0.0.0"), listen_port(80),
-        max_body_size(1024 * 1024) {} //* more info
+    ServerConfig() : max_body_size(1000000) {} // example default: 1 MB
 };
 
 // Holds the full parsed config file
@@ -39,4 +44,6 @@ struct Config
 {
     std::vector<ServerConfig> servers;
 };
+
+#endif // CONFIG_HPP
 

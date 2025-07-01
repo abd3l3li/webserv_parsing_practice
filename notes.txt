@@ -1,16 +1,28 @@
 
 Q&A:
 
- - how we re using get function without creating an instance of its obj
  - explain me this syntax get().x
+    * it calls get() then access the data.
+
  - how it this struct linked to tokens struct
+    * tokens gathered by tokenizer got passed to parser constructor
 
  - how nginx handling the order of the keyword --> does must be sorted or any order can be accepted and we must handle it
+ - handle duplication --> maybe using a vector
+
  - what is diff between peek and get
+   * peek for taking a sight 
+   * get for sight and moving o
 
  - explain me more about of the location /upload for ex, why need this then again in the block we get anoter one
 
  - how the three classes connected to each other and how is the relation worked
+
+ - Token(TokenType t, const std::string& txt), t have no reference?
+
+ - max size is for what in the config
+
+ - is it ok to let a field empty like in methods
 
  ---------------------------------------------------------------------------------------------------
 
@@ -29,13 +41,163 @@ Q&A:
 
 notes:
 
-the third while for what ??
-handle duplication --> maybe using a vector
-split the parser code
+    split the parser code
 
 -------------------- my understanding of parser funcs --------------------------
 
-- the first loop works for checking for more than one server creatin new conf each time .
-- the second loop works for checking single element each time in a server and creating new ServerConfig each time .
-- the third loop works for doing the same as the server one but for the location block .
-- the fourth one works for the methods that will be stored in one of ServerConfig vector .
+- the first loop works for checking for more than one server creatin new ServerConfig each time .
+- the second loop works for checking single element each time in a server and creating new key to each time 
+    to check for keywords and storing the value in the serverConfig val .
+- the third loop works for doing the same as the server one but for the location block and then
+    it store the matched values in the location vector of ServerConfig .
+- the fourth one works for the methods that will be stored in one of Locations vector.
+
+-----------------------------------
+
+Token vector structure:
+
+    Imagine this tokenized input:
+
+    server {
+    listen 127.0.0.1:8080;
+    }
+
+    becomes:
+
+    std::vector<Token> tokens = {
+    Token(KEYWORD, "server"),
+    Token(BRACE_OPEN, "{"),
+    Token(KEYWORD, "listen"),
+    Token(VALUE, "127.0.0.1:8080"),
+    Token(SEMICOLON, ";"),
+    Token(BRACE_CLOSE, "}"),
+    Token(END_OF_FILE, "")
+    };
+
+-----------------------------------
+
+Config Parser::parse()
+{
+    Config config; //!main
+    
+    while (peek().type != END_OF_FILE)
+    {
+        Token t = get();
+        if (t.type != KEYWORD || t.text != "server")
+        throw std::runtime_error("Expected 'server' keyword");
+        
+        if (get().type != BRACE_OPEN) //it calls get()
+        throw std::runtime_error("Expected '{' after server");
+        
+        ServerConfig server; //!main
+
+        while (peek().type != BRACE_CLOSE && peek().type != END_OF_FILE) //why eof
+        {
+            Token key = get();
+
+            if (key.type != KEYWORD)
+                throw std::runtime_error("Expected directive inside server block");
+
+            if (key.text == "listen")
+            {
+                Token val = get();
+                size_t colon = val.text.find(':');
+                if (colon == std::string::npos)
+                    throw std::runtime_error("Invalid listen format. Use IP:PORT");
+
+                server.listen_host = val.text.substr(0, colon);
+                std::string port_str = val.text.substr(colon + 1);
+                int port = std::atoi(port_str.c_str());
+
+                if (port < 1 || port > 65535) //why 65535
+                    throw std::runtime_error("Port must be between 1 and 65535");
+
+                server.listen_port = port;
+
+                if (get().type != SEMICOLON)
+                    throw std::runtime_error("Expected ';' after listen");
+            }
+            else if (key.text == "server_name")
+            {
+                Token val = get();
+                server.server_name = val.text;
+
+                if (get().type != SEMICOLON)
+                    throw std::runtime_error("Expected ';' after server_name");
+            }
+            else if (key.text == "location")
+            {
+                LocationConfig loc; //!main
+
+                Token path = get();
+                loc.path = path.text;
+
+                if (get().type != BRACE_OPEN)
+                    throw std::runtime_error("Expected '{' after location path");
+
+                while (peek().type != BRACE_CLOSE && peek().type != END_OF_FILE)
+                {
+                    Token lkey = get();
+
+                    if (lkey.text == "root")
+                    {
+                        loc.root = get().text;
+                        if (get().type != SEMICOLON)
+                            throw std::runtime_error("Expected ';' after root");
+                    }
+                    else if (lkey.text == "index")
+                    {
+                        loc.index = get().text;
+                        if (get().type != SEMICOLON)
+                            throw std::runtime_error("Expected ';' after index");
+                    }
+                    else if (lkey.text == "autoindex")
+                    {
+                        Token val = get();
+                        if (val.text == "on")
+                            loc.autoindex = true;
+                        else if (val.text == "off")
+                            loc.autoindex = false;
+                        else
+                            throw std::runtime_error("autoindex must be 'on' or 'off'");
+
+                        if (get().type != SEMICOLON)
+                            throw std::runtime_error("Expected ';' after autoindex");
+                    }
+                    else if (lkey.text == "methods")
+                    {
+                        while (peek().type == VALUE)
+                        {
+                            Token method = get();
+                            if (method.text != "GET" && method.text != "POST" && method.text != "DELETE")
+                                throw std::runtime_error("Invalid method: " + method.text);
+
+                            loc.methods.push_back(method.text);
+                        } //!end while for methods
+
+                        if (get().type != SEMICOLON)
+                            throw std::runtime_error("Expected ';' after methods");
+                    }
+                    else
+                    {
+                        throw std::runtime_error("Unknown location directive: " + lkey.text);
+                    }
+                } //!end while for location block
+
+                if (get().type != BRACE_CLOSE) //is this call move the index to checke for brace of server?
+                    throw std::runtime_error("Expected '}' at end of location block");
+
+                server.locations.push_back(loc);
+            }
+            else
+                throw std::runtime_error("Unknown server directive: " + key.text);
+        } //!end while for server block
+
+        if (get().type != BRACE_CLOSE)
+            throw std::runtime_error("Expected '}' at end of server block");
+
+        config.servers.push_back(server);
+    } //!end while for config
+
+    return config;
+}

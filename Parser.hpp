@@ -17,4 +17,14 @@ private:
 
     Token get();
     Token peek();
+
+        // Helper functions
+    void parseServer(Config& config);
+    void parseListen(ServerConfig& server);
+    void parseServerName(ServerConfig& server);
+    void parseLocation(ServerConfig& server);
+    void parseLocationRoot(LocationConfig& loc);
+    void parseLocationIndex(LocationConfig& loc);
+    void parseLocationAutoindex(LocationConfig& loc);
+    void parseLocationMethods(LocationConfig& loc);
 };

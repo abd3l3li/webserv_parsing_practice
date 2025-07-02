@@ -37,8 +37,7 @@ int main()
                 std::cout << "Server Name: " 
                         << server.server_name[0] << std::endl;
 
-            std::cout << "Max Body Size: " 
-                    << server.max_body_size << " bytes" << std::endl;
+            std::cout << "methods: " << server.locations[0].methods[0] << std::endl;
         }
         else
         {

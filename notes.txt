@@ -7,22 +7,30 @@ Q&A:
  - how it this struct linked to tokens struct
     * tokens gathered by tokenizer got passed to parser constructor
 
- - how nginx handling the order of the keyword --> does must be sorted or any order can be accepted and we must handle it
- - handle duplication --> maybe using a vector
 
  - what is diff between peek and get
    * peek for taking a sight 
    * get for sight and moving o
 
- - explain me more about of the location /upload for ex, why need this then again in the block we get anoter one
+ --- explain me more about of the location /upload for ex, why need this then again in the block we get anoter one
 
- - how the three classes connected to each other and how is the relation worked
+ -- how the three classes connected to each other and how is the relation worked
 
  - Token(TokenType t, const std::string& txt), t have no reference?
+    *✅ Cheap to copy (usually 4 bytes)
+    *So there's no need to pass them by reference.
+    *In fact, passing by reference might be slower because:
+    *It involves dereferencing a memory address
 
- - max size is for what in the config
+The reference still has to be stored (usually 8 bytes on 64-bit machines)
 
- - is it ok to let a field empty like in methods
+ -- max size is for what in the config
+
+ --- is it ok to let a field empty like in methods
+
+ - this is my final code i want you to tell me all the considered and required case i have to 
+    handle like nginx in the subject and then work with me one by one to edit them in my code to 
+    move on to the next part in my section as person B
 
  ---------------------------------------------------------------------------------------------------
 

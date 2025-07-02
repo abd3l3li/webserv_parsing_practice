@@ -1,8 +1,8 @@
-#ifndef PARSER_HPP
-#define PARSER_HPP
+#pragma once
 
 #include <vector>
 #include <string>
+#include <cstdlib>
 #include "Tokenizer.hpp"
 #include "Config.hpp"
 
@@ -28,6 +28,6 @@ private:
     void parseLocationIndex(LocationConfig& loc);
     void parseLocationAutoindex(LocationConfig& loc);
     void parseLocationMethods(LocationConfig& loc);
+
 };
 
-#endif // PARSER_HPP

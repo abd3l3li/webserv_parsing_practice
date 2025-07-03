@@ -2,10 +2,10 @@
 
 bool is_keyword(const std::string& word)
 {
-    static const std::string keywords[] = { //static so that it is initialized only once
+    static const std::string keywords[] = {
         "server", "listen", "location", "root", "methods",
         "index", "server_name", "autoindex", "error_page",
-        "upload_dir", "cgi_extension", "return", "client_max_body_size"
+        "upload_dir", "cgi_extension", "redirection", "client_max_body_size"
     };
 
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); ++i)
@@ -14,6 +14,7 @@ bool is_keyword(const std::string& word)
 
     return false;
 }
+
 
 Tokenizer::Tokenizer(const std::string& filePath)
 {

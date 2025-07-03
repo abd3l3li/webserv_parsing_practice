@@ -37,7 +37,11 @@ int main()
                 std::cout << "Server Name: " 
                         << server.server_name[0] << std::endl;
 
-            std::cout << "methods: " << server.locations[0].methods[0] << std::endl;
+            std::cout << "methods: " << server.locations[1].methods[0] << std::endl;
+            std::cout << "upload_dir: " << server.locations[1].upload_dir << std::endl;
+            std::cout << "redirection: " << server.locations[1].redirection << std::endl;
+            std::cout << "cgi_extension: " << server.locations[1].cgi_extension << std::endl;
+            std::cout << "error_pages: " << server.error_pages.size() << std::endl;
         }
         else
         {

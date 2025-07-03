@@ -53,6 +53,8 @@ void Parser::parseServer(Config& config) {
             parseServerName(server);
         } else if (key.text == "location") {
             parseLocation(server);
+        } else if (key.text == "error_page") {
+            parseErrorPage(server);
         } else {
             throw std::runtime_error("Unknown server directive: " + key.text);
         }

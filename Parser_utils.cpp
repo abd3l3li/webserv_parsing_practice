@@ -1,5 +1,4 @@
 #include "Parser.hpp"
-#include <set>
 
 void Parser::parseListen(ServerConfig& server) {
     Token val = get();
@@ -56,6 +55,9 @@ void Parser::parseLocation(ServerConfig& server) {
     bool index_seen = false;
     bool autoindex_seen = false;
     bool methods_seen = false;
+    bool upload_seen = false;
+    bool redirect_seen = false;
+    bool cgi_seen = false;
     
     while (peek().type != BRACE_CLOSE && peek().type != END_OF_FILE) {
         Token lkey = get();
@@ -80,80 +82,57 @@ void Parser::parseLocation(ServerConfig& server) {
                 throw std::runtime_error("Duplicate methods directive in location block");
             methods_seen = true;
             parseLocationMethods(loc);
+        } else if (lkey.text == "upload_dir") {
+            if (upload_seen)
+                throw std::runtime_error("Duplicate upload_dir directive in location block");
+            upload_seen = true;
+            parseLocationUpload(loc);
+        } else if (lkey.text == "redirection") {
+            if (redirect_seen)
+                throw std::runtime_error("Duplicate redirection directive in location block");
+            redirect_seen = true;
+            parseLocationRedirect(loc);
+        } else if (lkey.text == "cgi_extension") {
+            if (cgi_seen)
+                throw std::runtime_error("Duplicate cgi_extension directive in location block");
+            cgi_seen = true;
+            parseLocationCGI(loc);
         } else {
             throw std::runtime_error("Unknown location directive: " + lkey.text);
         }
-    }
-    
+}
+
     if (get().type != BRACE_CLOSE)
         throw std::runtime_error("Expected '}' at end of location block");
 
     server.locations.push_back(loc);
 }
 
-void Parser::parseLocationRoot(LocationConfig& loc) {
-    Token val = get();
-    if (val.type != VALUE)
-        throw std::runtime_error("Expected value for root directive");
-    if (val.text.empty())
-        throw std::runtime_error("Root path cannot be empty");
-    if (val.text[0] != '/')
-        throw std::runtime_error("Root path must start with '/'");
-    
-    loc.root = val.text;
+void Parser::parseErrorPage(ServerConfig& server) {
+    // Step 1: Get the error code (should be numeric)
+    Token codeToken = get();
+    if (codeToken.type != VALUE)
+        throw std::runtime_error("Expected status code for error_page");
+
+    int code = std::atoi(codeToken.text.c_str()); //!does this mean the int code stored as a string?
+    if (code < 300 || code > 599) //! 300-599 are valid HTTP status codes for error pages
+        throw std::runtime_error("Invalid status code for error_page: " + codeToken.text); //! this string how it prints int
+
+    // Step 2: Get the file path
+    Token fileToken = get();
+    if (fileToken.type != VALUE)
+        throw std::runtime_error("Expected path for error_page");
+
+    if (fileToken.text.empty())
+        throw std::runtime_error("Error page path cannot be empty");
+    if (fileToken.text[0] != '/')
+        throw std::runtime_error("Error page path must start with '/'");
+
+    // Step 3: Store in map
+    server.error_pages[code] = fileToken.text;
+
+    // Step 4: Expect ;
     if (get().type != SEMICOLON)
-        throw std::runtime_error("Expected ';' after root");
+        throw std::runtime_error("Expected ';' after error_page");
 }
 
-void Parser::parseLocationIndex(LocationConfig& loc) {
-    Token val = get();
-    if (val.type != VALUE)
-        throw std::runtime_error("Expected value for index directive");
-    if (val.text.empty())
-        throw std::runtime_error("Index cannot be empty");
-    if (val.text.find('/') != std::string::npos)
-        throw std::runtime_error("Index cannot contain '/' character");
-    if (val.text.find('.') == std::string::npos)
-        throw std::runtime_error("Index must have an extension (e.g. index.html)");
-    
-    loc.index = val.text;
-
-    if (get().type != SEMICOLON)
-        throw std::runtime_error("Expected ';' after index");
-}
-
-void Parser::parseLocationAutoindex(LocationConfig& loc) {
-    Token val = get();
-    if (val.type != VALUE)
-        throw std::runtime_error("Expected value for autoindex directive");
-    if (val.text == "on") {
-        loc.autoindex = true;
-    } else if (val.text == "off") {
-        loc.autoindex = false;
-    } else {
-        throw std::runtime_error("autoindex must be 'on' or 'off'");
-    }
-    
-    if (get().type != SEMICOLON)
-        throw std::runtime_error("Expected ';' after autoindex");
-}
-
-void Parser::parseLocationMethods(LocationConfig& loc) {
-
-    std::set<std::string> methodDup_set;
-
-    while (peek().type == VALUE) {
-        Token method = get();
-        if (method.text != "GET" && method.text != "POST" && method.text != "DELETE")
-            throw std::runtime_error("Invalid method: " + method.text);
-            
-        if (!methodDup_set.insert(method.text).second)
-            throw std::runtime_error("Duplicate method: " + method.text);
-        loc.methods.push_back(method.text);
-    }
-    if (loc.methods.empty())
-        throw std::runtime_error("At least one method must be specified");
-
-    if (get().type != SEMICOLON)
-        throw std::runtime_error("Expected ';' after methods");
-}

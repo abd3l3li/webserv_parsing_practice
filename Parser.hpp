@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <set>
 #include "Tokenizer.hpp"
 #include "Config.hpp"
 
@@ -28,6 +29,10 @@ private:
     void parseLocationIndex(LocationConfig& loc);
     void parseLocationAutoindex(LocationConfig& loc);
     void parseLocationMethods(LocationConfig& loc);
+    void parseLocationUpload(LocationConfig& loc);
+    void parseLocationRedirect(LocationConfig& loc);
+    void parseLocationCGI(LocationConfig& loc);
+    void parseErrorPage(ServerConfig& server);
 
 };
 

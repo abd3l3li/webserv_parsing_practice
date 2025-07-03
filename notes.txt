@@ -1,6 +1,9 @@
 
 Q&A:
 
+ - you have to understand all the filled field role
+ - why using 300 > code
+
  - explain me this syntax get().x
     * it calls get() then access the data.
 

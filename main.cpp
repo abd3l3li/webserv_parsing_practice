@@ -14,11 +14,18 @@ std::string type_to_text(TokenType type)
     return "UNKNOWN";
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+
+    if (argc != 2)
+    {
+        std::cerr << "Usage: " << argv[0] << " <config_file>" << std::endl;
+        return 1;
+    }
+    
     try 
     {
-        Tokenizer tokenizer("config.conf");
+        Tokenizer tokenizer(argv[1]);
         std::vector<Token> tokens = tokenizer.tokenize();
         Parser parser(tokens);
         Config config = parser.parse();
@@ -42,6 +49,7 @@ int main()
             std::cout << "redirection: " << server.locations[1].redirection << std::endl;
             std::cout << "cgi_extension: " << server.locations[1].cgi_extension << std::endl;
             std::cout << "error_pages: " << server.error_pages.size() << std::endl;
+            std::cout << "max_body_size: " << server.max_body_size << std::endl;
         }
         else
         {

@@ -10,7 +10,8 @@
 class Parser
 {
 public:
-    Parser(const std::vector<Token>& tokens);
+    Parser(const std::vector<Token>& tokens) 
+        : _tokens(tokens), _index(0) {};
     Config parse();
 
 private:
@@ -33,6 +34,7 @@ private:
     void parseLocationRedirect(LocationConfig& loc);
     void parseLocationCGI(LocationConfig& loc);
     void parseErrorPage(ServerConfig& server);
+    void parseMaxBodySize(ServerConfig& server);
 
 };
 

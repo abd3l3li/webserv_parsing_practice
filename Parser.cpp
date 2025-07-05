@@ -1,10 +1,6 @@
 #include "Parser.hpp"
 // #include <stdexcept>
 
-Parser::Parser(const std::vector<Token>& tokens)
-    : _tokens(tokens), _index(0)
-{}
-
 Token Parser::peek() {
     if (_index < _tokens.size())
         return _tokens[_index];
@@ -26,6 +22,9 @@ Config Parser::parse() {
     while (peek().type != END_OF_FILE) {
         parseServer(config);
     }
+
+    if (config.servers.empty())
+        throw std::runtime_error("No server blocks found in configuration");
     
     return config;
 }
@@ -55,6 +54,8 @@ void Parser::parseServer(Config& config) {
             parseLocation(server);
         } else if (key.text == "error_page") {
             parseErrorPage(server);
+        } else if (key.text == "max_body_size") {
+            parseMaxBodySize(server);
         } else {
             throw std::runtime_error("Unknown server directive: " + key.text);
         }

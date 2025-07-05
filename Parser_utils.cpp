@@ -13,7 +13,7 @@ void Parser::parseListen(ServerConfig& server) {
     hp.listen_host = val.text.substr(0, colon);
     hp.listen_port = std::atoi(val.text.substr(colon + 1).c_str());
 
-    if (hp.listen_port < 1 || hp.listen_port > 65535)  // 65535 is max port number (2^16 - 1)
+    if (hp.listen_port < 1 || hp.listen_port > 65535)  // 65535 is max port number
         throw std::runtime_error("Port must be between 1 and 65535");
 
     if (hp.listen_host.empty() || hp.listen_port == 0)
@@ -114,9 +114,9 @@ void Parser::parseErrorPage(ServerConfig& server) {
     if (codeToken.type != VALUE)
         throw std::runtime_error("Expected status code for error_page");
 
-    int code = std::atoi(codeToken.text.c_str()); //!does this mean the int code stored as a string?
-    if (code < 300 || code > 599) //! 300-599 are valid HTTP status codes for error pages
-        throw std::runtime_error("Invalid status code for error_page: " + codeToken.text); //! this string how it prints int
+    int code = std::atoi(codeToken.text.c_str());
+    if (code < 300 || code > 599)
+        throw std::runtime_error("Invalid status code for error_page: " + codeToken.text);
 
     // Step 2: Get the file path
     Token fileToken = get();
@@ -131,8 +131,31 @@ void Parser::parseErrorPage(ServerConfig& server) {
     // Step 3: Store in map
     server.error_pages[code] = fileToken.text;
 
-    // Step 4: Expect ;
     if (get().type != SEMICOLON)
         throw std::runtime_error("Expected ';' after error_page");
 }
+
+void Parser::parseMaxBodySize(ServerConfig& server) {
+    Token val = get();
+    if (val.type != VALUE)
+        throw std::runtime_error("Expected value for client_max_body_size");
+
+    if (val.text.empty())
+        throw std::runtime_error("client_max_body_size cannot be empty");
+
+    for (size_t i = 0; i < val.text.length(); ++i) {
+        if (!std::isdigit(val.text[i]))
+            throw std::runtime_error("client_max_body_size must be a positive number");
+    }
+
+    long long size = std::atoll(val.text.c_str());
+    if (size < 0)
+        throw std::runtime_error("client_max_body_size must not be negative");
+
+    server.max_body_size = static_cast<size_t>(size);
+
+    if (get().type != SEMICOLON)
+        throw std::runtime_error("Expected ';' after client_max_body_size");
+}
+
 

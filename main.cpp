@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "Parser.hpp"
+#include "Router.hpp"
 
 // Utility function to print token type as string
 std::string type_to_text(TokenType type)
@@ -55,6 +56,9 @@ int main(int argc, char *argv[])
         {
             std::cout << "No server blocks found in config." << std::endl;
         }
+
+        const ServerConfig& server = matchServer(config, "localhost", 8080);
+        matchLocation(server, "/images/icons/logo.png");
     }
 
     catch (const std::exception& e)

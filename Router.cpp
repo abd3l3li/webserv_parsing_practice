@@ -99,7 +99,7 @@ std::string finalPath(const LocationConfig& location, const std::string& uri) {
 
 // DO: This function routes a request based on the configuration, host, port, and URI.
 // RETURN: a RoutingResult containing the matched server, location, file path, and redirection
-RoutingResult requestedRout(const Config& config, const std::string& host,
+RoutingResult routingResult(const Config& config, const std::string& host,
                         int port, const std::string& uri)
 {
     const ServerConfig& server = matchServer(config, host, port);

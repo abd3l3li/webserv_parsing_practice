@@ -13,5 +13,5 @@ struct RoutingResult
 const ServerConfig& matchServer(const Config& config, const std::string& host, int port);
 const LocationConfig& matchLocation(const ServerConfig& server, const std::string& uri);
 std::string finalPath(const LocationConfig& location, const std::string& uri);
-RoutingResult requestedRout(const Config& config, const std::string& host,
+RoutingResult routingResult(const Config& config, const std::string& host,
                         int port, const std::string& uri);

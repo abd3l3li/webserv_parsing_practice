@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         // Access the first server block safely
         if (!config.servers.empty())
         {
-            RoutingResult result = requestedRout(config, "localhost", 8080, "/docs/index.html");
+            RoutingResult result = routingResult(config, "localhost", 8080, "/docs/index.html");
             std::cout << "Matched Server: " << result.server->server_name[0] << std::endl;
             std::cout << "Matched Location: " << result.location->path << std::endl;
             if (result.is_redirect)

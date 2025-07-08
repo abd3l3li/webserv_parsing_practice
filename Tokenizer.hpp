@@ -16,6 +16,7 @@ enum TokenType
     BRACE_OPEN,     // {
     BRACE_CLOSE,    // }
     SEMICOLON,      // ;
+    EQUAL,          // =
     END_OF_FILE     // Reached end of config
 };
 

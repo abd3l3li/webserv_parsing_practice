@@ -34,31 +34,22 @@ int main(int argc, char *argv[])
         // Access the first server block safely
         if (!config.servers.empty())
         {
-            const ServerConfig& server = config.servers[0];
-
-            if (!server.listens.empty())
-                std::cout << "Listen: " 
-                        << server.listens[1].listen_host << ":" 
-                        << server.listens[1].listen_port << std::endl;
-
-            if (server.server_name.size() >= 1)
-                std::cout << "Server Name: " 
-                        << server.server_name[0] << std::endl;
-
-            std::cout << "methods: " << server.locations[1].methods[0] << std::endl;
-            std::cout << "upload_dir: " << server.locations[1].upload_dir << std::endl;
-            std::cout << "redirection: " << server.locations[1].redirection << std::endl;
-            std::cout << "cgi_extension: " << server.locations[1].cgi_extension << std::endl;
-            std::cout << "error_pages: " << server.error_pages.size() << std::endl;
-            std::cout << "max_body_size: " << server.max_body_size << std::endl;
+            RoutingResult result = requestedRout(config, "localhost", 8080, "/docs/index.html");
+            std::cout << "Matched Server: " << result.server->server_name[0] << std::endl;
+            std::cout << "Matched Location: " << result.location->path << std::endl;
+            if (result.is_redirect)
+            {
+                std::cout << "Redirect URL: " << result.redirect_url << std::endl;
+            }
+            else
+            {
+                std::cout << "File Path: " << result.file_path << std::endl;
+            }
         }
         else
         {
             std::cout << "No server blocks found in config." << std::endl;
         }
-
-        const ServerConfig& server = matchServer(config, "localhost", 8080);
-        matchLocation(server, "/images/icons/logo.png");
     }
 
     catch (const std::exception& e)

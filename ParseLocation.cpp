@@ -83,12 +83,14 @@ void Parser::parseLocationUpload(LocationConfig& loc) {
 }
 
 void Parser::parseLocationRedirect(LocationConfig& loc) {
+    if (get().type != EQUAL)
+        throw std::runtime_error("Expected '=' after redirection");
+
     Token val = get();
     if (val.type != VALUE)
-        throw std::runtime_error("Expected value for redirection");
+        throw std::runtime_error("Expected URL after '='");
     if (val.text.empty())
-        throw std::runtime_error("redirection URL cannot be empty");
-
+        throw std::runtime_error("Redirection URL cannot be empty");
     loc.redirection = val.text;
 
     if (get().type != SEMICOLON)

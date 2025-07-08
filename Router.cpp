@@ -1,5 +1,8 @@
 #include "Router.hpp"
 
+
+// DO: Match a server block based on host and port
+// RETURN: the first server block that matches the port, or the first server block matches the host if no port match is found
 const ServerConfig& matchServer(const Config& config, const std::string& host, int port) {
     const ServerConfig* fallback = NULL;
 
@@ -32,31 +35,11 @@ const ServerConfig& matchServer(const Config& config, const std::string& host, i
     throw std::runtime_error("No server block found for that port");
 }
 
-// Match the longest matching location for a given URI in a server block
-/*
-    ✅ EXAMPLE
 
-    Imagine you have 3 location blocks:
-
-    /
-
-    /images
-
-    /images/icons
-
-    Request URI: /images/icons/logo.png
-
-    Step-by-step:
-
-    / → matches (shortest)
-
-    /images → also matches (longer than /)
-
-    /images/icons → also matches (longest)
-
-    → The function returns /images/icons block.
-*/
+// DO: This function matches the longest location path for a given URI in a server block.
+// RETURN: the location block that matches the URI
 const LocationConfig& matchLocation(const ServerConfig& server, const std::string& uri) {
+    
     const LocationConfig *match = NULL;
     size_t longest = 0;
 
@@ -95,3 +78,47 @@ const LocationConfig& matchLocation(const ServerConfig& server, const std::strin
     return *match;
 }
 
+
+// DO: This function gives you the physical file path on disk based on the config and URI.
+// RETURN: root + (uri - location.path)
+std::string finalPath(const LocationConfig& location, const std::string& uri) {
+    const std::string& root = location.root;
+    const std::string& locPath = location.path;
+
+    // Step 1: remove the location path from the URI
+        // substr(index to start from, length of the substring)
+    std::string remain = uri.substr(locPath.length());
+
+    // Step 2: avoid double slashes
+    if (root[root.size() - 1] == '/' && !remain.empty() && remain[0] == '/')
+        remain = remain.substr(1);
+
+    // Step 3: combine root + remain
+    return root + remain;
+}
+
+// DO: This function routes a request based on the configuration, host, port, and URI.
+// RETURN: a RoutingResult containing the matched server, location, file path, and redirection
+RoutingResult requestedRout(const Config& config, const std::string& host,
+                        int port, const std::string& uri)
+{
+    const ServerConfig& server = matchServer(config, host, port);
+    const LocationConfig& location = matchLocation(server, uri);
+
+    RoutingResult result;
+    result.server = &server;
+    result.location = &location;
+
+    if (!location.redirection.empty())
+    {
+        result.is_redirect = true;
+        result.redirect_url = location.redirection;
+    }
+    else
+    {
+        result.is_redirect = false;
+        result.file_path = finalPath(location, uri);
+    }
+
+    return result;
+}

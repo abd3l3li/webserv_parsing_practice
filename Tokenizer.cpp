@@ -86,6 +86,17 @@ std::vector<Token> Tokenizer::tokenize()
             }
             tokens.push_back(Token(SEMICOLON, ";"));
         }
+        else if (c == '=')
+        {
+            if (!word.empty()) {
+                if (is_keyword(word))
+                    tokens.push_back(Token(KEYWORD, word));
+                else
+                    tokens.push_back(Token(VALUE, word));
+                word.clear();
+            }
+            tokens.push_back(Token(EQUAL, "="));
+        }
         else
         {
             word += c;

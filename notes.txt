@@ -4,6 +4,12 @@ Q&A:
  - you have to understand all the filled field role
  - why using 300 > code
 
+ -📌 why no more initilizing
+    *std::string is a C++ class. Even if it's "not set" (you never assigned to it),
+         it is still a valid object with a safe, empty string inside.
+            So:
+                If location.index is not set, it defaults to ""        
+
  - explain me this syntax get().x
     * it calls get() then access the data.
 
@@ -16,8 +22,10 @@ Q&A:
    * get for sight and moving o
 
  --- explain me more about of the location /upload for ex, why need this then again in the block we get anoter one
+        *the virtual and real concep
 
  -- how the three classes connected to each other and how is the relation worked
+        *the tree logic
 
  - Token(TokenType t, const std::string& txt), t have no reference?
     *✅ Cheap to copy (usually 4 bytes)
@@ -28,8 +36,10 @@ Q&A:
 The reference still has to be stored (usually 8 bytes on 64-bit machines)
 
  -- max size is for what in the config
+    *for uploading data ig
 
  --- is it ok to let a field empty like in methods
+    *no -> need more info
 
  - this is my final code i want you to tell me all the considered and required case i have to 
     handle like nginx in the subject and then work with me one by one to edit them in my code to 
@@ -89,6 +99,6 @@ Token vector structure:
 
 Config Parser::parse()
 {
-        while (peek().type != BRACE_CLOSE && peek().type != END_OF_FILE) //why eof
+        while (peek().type != BRACE_CLOSE && peek().type != END_OF_FILE) // ❌why eof
         {} 
 }

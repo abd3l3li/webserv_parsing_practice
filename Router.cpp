@@ -1,4 +1,6 @@
 #include "Router.hpp"
+#include "sys/stat.h"
+#include "unistd.h"
 
 
 // DO: Match a server block based on host and port
@@ -97,8 +99,37 @@ std::string finalPath(const LocationConfig& location, const std::string& uri) {
     return root + remain;
 }
 
+
+
+// Server looks for: /www/docs/index.html
+// If it doesn’t exist, but autoindex is on → generate a listing
+// If it doesn’t exist and autoindex is off → return 404
+
+// Check if a path is a directory
+bool isDirectory(const std::string& path) {
+    // data type for file status
+    struct stat s;
+    // if path exists and s filled ir return 0
+    // S_ISDIR checks if the file is a directory through .st_mode member
+        // and return true if it is a directory
+    //st_mode Field in struct stat that encodes type and permissions
+    return (stat(path.c_str(), &s) == 0 && S_ISDIR(s.st_mode));
+}
+
+// Check if a file exists
+bool fileExists(const std::string& path) {
+    struct stat s;
+    return (stat(path.c_str(), &s) == 0);
+}
+
 // DO: This function routes a request based on the configuration, host, port, and URI.
 // RETURN: a RoutingResult containing the matched server, location, file path, and redirection
+// 📌 Summary :
+    // we have many cases like:
+    // 1. if the location has a redirection, we return the redirection URL
+    // 2. if the location is a directory and has an index file, we return the index file path
+    // 3. if the location is a directory and has autoindex enabled, we return the directory path and set use_autoindex to true
+    // 4. if the location is a file, we return the file path as it is
 RoutingResult routingResult(const Config& config, const std::string& host,
                         int port, const std::string& uri)
 {
@@ -113,11 +144,38 @@ RoutingResult routingResult(const Config& config, const std::string& host,
     {
         result.is_redirect = true;
         result.redirect_url = location.redirection;
+        result.use_autoindex = false;
     }
     else
     {
-        result.is_redirect = false;
         result.file_path = finalPath(location, uri);
+        result.is_redirect = false;
+
+        if (isDirectory(result.file_path))
+        {
+            std::string index_path = result.file_path + "/" + location.index;
+
+            if (fileExists(index_path))
+            {
+                // int access(const char* pathname, int mode);
+                if (access(index_path.c_str(), R_OK) != 0)
+                    throw std::runtime_error("Cannot access index file: " + index_path);
+                result.use_autoindex = false;
+                result.file_path = index_path;
+            }
+            else if (location.autoindex)
+            {
+                result.use_autoindex = true;
+            }
+            else
+            {
+                throw std::runtime_error("No index file found and autoindex is off");
+            }
+        }
+        else
+        {
+            result.use_autoindex = false;
+        }
     }
 
     return result;

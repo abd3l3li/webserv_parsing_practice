@@ -7,6 +7,8 @@ struct RoutingResult
     std::string file_path;
     bool is_redirect;
     std::string redirect_url;
+    bool is_directory; // true if the final path is a directory
+    bool use_autoindex; // true if autoindex is enabled for the location
 };
 
 

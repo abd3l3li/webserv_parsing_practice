@@ -127,9 +127,9 @@ bool fileExists(const std::string& path) {
 // 📌 Summary :
     // we have many cases like:
     // 1. if the location has a redirection, we return the redirection URL
-    // 2. if the location is a directory and has an index file, we return the index file path
+    // 2. if the location is a directory and has an index file, we return the index file path after checks
     // 3. if the location is a directory and has autoindex enabled, we return the directory path and set use_autoindex to true
-    // 4. if the location is a file, we return the file path as it is
+    // 4. if the location is a file, we check if it exists and is accessible, then return the file path
 RoutingResult routingResult(const Config& config, const std::string& host,
                         int port, const std::string& uri)
 {
@@ -150,20 +150,25 @@ RoutingResult routingResult(const Config& config, const std::string& host,
     {
         result.file_path = finalPath(location, uri);
         result.is_redirect = false;
-
         if (isDirectory(result.file_path))
         {
-            std::string index_path = result.file_path + "/" + location.index;
-
-            if (fileExists(index_path))
+            if (!location.index.empty())
             {
-                // int access(const char* pathname, int mode);
-                if (access(index_path.c_str(), R_OK) != 0)
-                    throw std::runtime_error("Cannot access index file: " + index_path);
-                result.use_autoindex = false;
-                result.file_path = index_path;
+                std::string index_path = result.file_path + "/" + location.index;
+
+                if (fileExists(index_path))
+                {
+                    if (access(index_path.c_str(), R_OK) != 0)
+                        throw std::runtime_error("Cannot access index file: " + index_path);
+
+                    result.use_autoindex = false;
+                    result.file_path = index_path;
+                    return result; // We're done
+                }
             }
-            else if (location.autoindex)
+
+            // Either index was empty or the index file was missing
+            if (location.autoindex)
             {
                 result.use_autoindex = true;
             }
@@ -172,9 +177,16 @@ RoutingResult routingResult(const Config& config, const std::string& host,
                 throw std::runtime_error("No index file found and autoindex is off");
             }
         }
+        // if the file does not exist here that means that's ur prblm you provided the wrong path
         else
         {
             result.use_autoindex = false;
+            result.is_directory = false; // It's a file, not a directory
+
+            if (!fileExists(result.file_path))
+                throw std::runtime_error("File does not exist: " + result.file_path);
+            if (access(result.file_path.c_str(), R_OK) != 0)
+                throw std::runtime_error("Cannot access file: " + result.file_path);
         }
     }
 

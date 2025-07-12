@@ -33,8 +33,8 @@ const ServerConfig& matchServer(const Config& config, const std::string& host, i
 
     if (fallback)
         return *fallback;
-
-    throw std::runtime_error("No server block found for that port");
+    else
+        throw std::runtime_error("No server block found for that port");
 }
 
 
@@ -131,7 +131,7 @@ bool fileExists(const std::string& path) {
     // 3. if the location is a directory and has autoindex enabled, we return the directory path and set use_autoindex to true
     // 4. if the location is a file, we check if it exists and is accessible, then return the file path
 RoutingResult routingResult(const Config& config, const std::string& host,
-                        int port, const std::string& uri)
+                        int port, const std::string& uri, const std::string& method)
 {
     const ServerConfig& server = matchServer(config, host, port);
     const LocationConfig& location = matchLocation(server, uri);
@@ -190,5 +190,16 @@ RoutingResult routingResult(const Config& config, const std::string& host,
         }
     }
 
+    if (!isMethodAllowed(location, method))
+        throw std::runtime_error("Method not allowed for this location: " + method);
+
     return result;
+}
+
+bool isMethodAllowed(const LocationConfig& location, const std::string& method) {
+    for (size_t i = 0; i < location.methods.size(); ++i){
+        if (location.methods[i] == method)
+            return true;
+    }
+    return false;
 }

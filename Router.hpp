@@ -16,4 +16,5 @@ const ServerConfig& matchServer(const Config& config, const std::string& host, i
 const LocationConfig& matchLocation(const ServerConfig& server, const std::string& uri);
 std::string finalPath(const LocationConfig& location, const std::string& uri);
 RoutingResult routingResult(const Config& config, const std::string& host,
-                        int port, const std::string& uri);
+                        int port, const std::string& uri, const std::string& method);
+bool isMethodAllowed(const LocationConfig& location, const std::string& method);

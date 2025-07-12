@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
         Parser parser(tokenizer.tokenize());
         Config config = parser.parse();
 
-        RoutingResult result = routingResult(config, "localhost", 8080, "/docs/"); // /docs/index.html
+        RoutingResult result = routingResult(config, "localhost", 8080, "/docs/index.html", "DELETE");
 
         if (result.is_redirect)
             std::cout << "Redirect to: " << result.redirect_url << std::endl;

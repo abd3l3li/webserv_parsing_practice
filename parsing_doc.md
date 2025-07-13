@@ -26,5 +26,6 @@ This module parses the config file and maps incoming requests to the correct ser
 
 Use this after parsing config:
 
-```c
+```cpp
 RoutingResult result = routingResult(config, host, port, uri, method);
+```

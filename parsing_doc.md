@@ -6,7 +6,7 @@ This module parses the config file and maps incoming requests to the correct ser
 
 ## 🔧 What is Implemented
 
-- [x] Tokenizer (config file to tokens)
+- [] Tokenizer (config file to tokens)
 - [x] Parser (tokens to Config structure)
 - [x] Supports multiple `server` blocks
 - [x] Multiple `listen` & `server_name` support

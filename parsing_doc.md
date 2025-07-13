@@ -28,4 +28,3 @@ Use this after parsing config:
 
 ```cpp
 RoutingResult result = routingResult(config, host, port, uri, method);
-```

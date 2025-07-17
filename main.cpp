@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
 
         RoutingResult result = routingResult(config, "localhost", 8080, "/docs/index.html", "DELETE");
 
+        std::cout << "Server count: " << result.server_count << std::endl;
         if (result.is_redirect)
             std::cout << "Redirect to: " << result.redirect_url << std::endl;
         else if (result.use_autoindex)

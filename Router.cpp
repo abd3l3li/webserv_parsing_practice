@@ -135,10 +135,11 @@ RoutingResult routingResult(const Config& config, const std::string& host,
 {
     const ServerConfig& server = matchServer(config, host, port);
     const LocationConfig& location = matchLocation(server, uri);
-
+    
     RoutingResult result;
     result.server = &server;
     result.location = &location;
+    result.server_count = config.servers.size();
 
     if (!location.redirection.empty())
     {

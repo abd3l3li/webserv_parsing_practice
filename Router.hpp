@@ -3,6 +3,7 @@
 struct RoutingResult
 {
     const ServerConfig* server;
+    size_t server_count;
     const LocationConfig* location;
     std::string file_path;
     bool is_redirect;

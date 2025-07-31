@@ -5,7 +5,7 @@ This module parses the config file and maps incoming requests to the correct ser
 
 ---
 
-Don't forget to visit the full implementation of (https://github.com/Lc0d3r/1337-Webserv.git) repo.
+Don't forget to visit the full implementation of [42Webserv](https://github.com/Lc0d3r/1337-Webserv.git) Repo.
 
 ---
 

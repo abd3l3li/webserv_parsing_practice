@@ -27,7 +27,7 @@ Don't forget to visit the full implementation of [42Webserv](https://github.com/
 
 ---
 
-## 🔗 Routing Interface (for Person A/C)
+## 🔗 Routing Interface
 
 Use this after parsing config:
 
